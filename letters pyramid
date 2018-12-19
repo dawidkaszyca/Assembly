@@ -1,0 +1,75 @@
+//Simple letters pyramid without interruption (only int 21 end program)
+//Assembly 8086
+Progr           segment
+                assume  cs:Progr, ds:dane, ss:stoosik
+
+start:          mov ax,dane
+                mov ds,ax
+                mov ax,stoosik
+                mov ss,ax
+                mov sp,offset szczyt
+ustaw:
+                mov bx,0b800h
+                mov es,bx ;wgrywamy do es adres poczatku ekranu
+                mov di, 0 ;licznik przesuniecia
+                mov al, ' ';znak
+                mov ah, 1eh ;tlo i kolor znaku
+		mov cx, 2000 ;ustawiamy licznik petli cx 2000 poniewaz konsola to 80x25
+czysc:		
+		mov es:[di], ax   	
+		add di,2 	
+		loop czysc
+
+		mov bx,1 	
+		mov di,przesun 	
+		mov cx,25 	
+
+Pion:		
+		cmp licznikznakow,0 	
+		jnz poziom 
+		cmp kolor,1eh 	
+		je  resetkolor 	
+		inc kolor	 
+		add di,przesun 	
+		add di,przesun
+		sub przesun,2
+		inc znak	
+		add bx,2 	
+		mov licznikznakow,bx 
+		mov ah,kolor 	
+		loop pion 	
+
+		jmp koniec 	;konczy program
+
+Poziom:
+		mov al,znak 
+		mov es:[di], ax 
+		add di,2 
+		dec licznikznakow 
+		jmp pion 
+
+resetkolor:
+		mov kolor,14h
+		jmp pion
+
+		
+koniec:				
+		;koniec programu
+		mov     ah,4ch
+                mov     al,0
+                int  21h
+Progr           ends
+
+dane            segment
+	 przesun dw 78
+	 licznikznakow dw 1
+	 znak db 65 
+	 kolor db 14h
+dane            ends
+
+stoosik          segment
+                dw    100h dup(0)
+szczyt          Label word
+stosik          ends
+
+end start
