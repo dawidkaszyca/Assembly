@@ -1,0 +1,205 @@
+//Dec to bin and hex converter
+//Assembly 8086
+Progr           segment
+                assume  cs:Progr, ds:dane, ss:stosik
+
+start:          mov     ax,dane
+                mov     ds,ax
+                mov     ax,stosik
+                mov     ss,ax
+                mov     sp,offset szczyt   
+
+main:
+		mov cx,5
+		call pobierz
+		call ustawbin
+		call bin
+		mov cx,licznik
+		call wyswietlbin
+		call ustawhex
+		call hex
+		mov cx,licznik
+		call wyswietlhex
+		call koniec
+    
+pobierz:
+		mov ah,01h
+		int 21h
+		cmp al,0Dh 		;sprawdz enter
+		jz wroc 		;jesli rowne
+		cmp al,'1'
+   		jl reset 		;jestli mniejsze
+		cmp al,'9'
+		jg reset 		;jesli wieksze
+		mov cl,al
+		mov ax,liczba
+		mov bx,10
+		mul bx
+		jc reset		;jesli przepelnienie
+		mov liczba,ax
+		mov bl,cl 
+		sub bl,48 		;odejmnij od liczby na ascii
+		mov bh,0 		;zeruj bh w razie w
+		add liczba,bx ;
+		loop pobierz
+		ret
+    
+reset:
+		mov ah, 0eh
+		mov al,10 ;nowa linia
+		int 10h
+		mov al,13 ;powrot do lewej strony konsoli
+		int 10h
+		mov cx,5
+		mov liczba,0
+		call main
+wroc:
+		
+		ret
+ustawbin:
+		mov cx,petla
+		mov ax,dane
+		mov es,ax
+		mov di,0
+		mov ax,liczba
+		mov podzielona,ax
+		mov ax,podzielona
+		ret
+bin:
+		mov dx,0
+		mov bx,2
+		div bx 
+		mov podzielona,ax
+		add dl,48
+		mov es:[di],dl
+		inc di
+		inc licznik
+		cmp ax,0
+		je jedynka
+		cmp ax,1
+		loopnz bin
+		je dopisz
+
+dopisz:
+		mov es:[di],'1'	
+		inc licznik
+		ret
+
+jedynka:
+		dec di
+		ret
+
+wyswietlbin:
+		mov ah, 0eh
+		mov al,es:[di]
+		dec di
+		int 10h
+		loop wyswietlbin
+
+		mov al,10 ;nowa linia
+		int 10h
+		mov al,13 ;powrot do lewej strony konsoli
+		int 10h
+		ret
+
+ustawhex:
+		mov ax,liczba
+		mov podzielona,ax
+		mov cx,4
+		mov es,es:[16]
+		mov di,0
+		mov licznik,0
+		ret
+
+hex:		
+		mov dx,0 ;tu bedzie reszta
+		mov bx,16 ;dzielimy przez ile
+		div bx ;dziel
+		mov podzielona,ax
+		mov es:[di],dl
+		inc di
+		inc licznik
+		cmp ax,0
+		je mala
+		cmp ax,16
+		jl dopiszr
+		loop hex
+
+dopiszr:
+		mov dx,0
+		mov bx,16
+		div bx
+		mov es:[di],dl
+		inc licznik
+		ret
+
+mala:		
+		dec di
+		ret
+
+wyswietlhex:
+		mov bl,es:[di]
+		call znak
+		dec di
+		mov ah, 0eh
+		mov al,bl
+		int 10h		
+		loop wyswietlhex
+		call koniec
+
+znak:
+		cmp bl,10
+		je ustawA
+		jl dodaj
+		cmp bl,11
+		je ustawB
+		cmp bl,12
+		je ustawC
+		cmp bl,13
+		je ustawD
+		cmp bl,14
+		je ustawE
+		cmp bl,15
+		je ustawF
+dodaj:
+		add bl,48
+		ret
+ustawA:
+		mov bl,'A'	
+		ret
+ustawB:
+		mov bl,'B'	
+		ret
+ustawC:
+		mov bl,'C'	
+		ret
+ustawD:
+		mov bl,'D'	
+		ret
+ustawE:
+		mov bl,'E'	
+		ret
+ustawF:
+		mov bl,'F'	
+		ret
+koniec:
+      		mov     ah,4ch
+	        mov	    al,2
+	        int	    21h
+Progr           ends
+
+dane            segment
+db 16 dup(0)
+szesna db 4 dup(0)
+liczba dw 0
+podzielona dw 0
+petla dw 16
+licznik dw 0
+dane            ends
+
+stosik          segment
+                dw    100h dup(0)
+szczyt          Label word
+stosik          ends
+
+end start
