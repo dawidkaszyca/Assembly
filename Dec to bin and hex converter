@@ -183,6 +183,8 @@ ustawF:
 		mov bl,'F'	
 		ret
 koniec:
+		mov     ah,00
+		int 16h
       		mov     ah,4ch
 	        mov	    al,2
 	        int	    21h
