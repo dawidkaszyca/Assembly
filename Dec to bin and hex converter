@@ -27,7 +27,7 @@ pobierz:
                 mov ah,01h
                 int 21h
                 cmp al,0Dh              ;sprawdz enter
-                jz wroc                 
+                jz ustawbin                 
                 cmp al,'0'
                 jl reset                
                 cmp al,'9'
@@ -43,20 +43,17 @@ pobierz:
                 mov bh,0
                 add liczba,bx ;
 		jc reset  
- 		mov cx,pomoc
-		dec pomoc
-                loop pobierz
+		cmp al,0Dh
+                loopnz pobierz
                 ret
 reset:
 		mov dx, offset bladCyfra
 		mov ah,09h ;wyswietla napis
 		int 21h
                	call nowalinia
-                mov pomoc,6
                 mov liczba,0
                 call main
-wroc:
-                jmp ustawbin
+
 nowalinia:
 		mov ah, 0eh
 		mov al,10 ;nowa linia
@@ -125,7 +122,6 @@ binarna db 16 dup(0) ;16 komorek pamieci wypelnionych nullami odpowiednik tablic
 szesna db 4 dup(0) ;4 komorki pamieci 
 bladCyfra db "  Podana cyfra jest bledna$"
 napis db "Podaj liczbe: $"
-pomoc dw 6    ;1 petla pobierz ile razy
 liczba dw 0   ;liczba podana przez uzytkownika 2bajty
 licznik dw 0  ;liczy ile wydrukowac do petli
 koncowka db 0 ;jaka wartosc na koncu h czy b
